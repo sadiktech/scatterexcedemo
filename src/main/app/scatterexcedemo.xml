@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
+    <http:request-config name="HTTP_Request_Configuration" host="172.9.9.9" port="9999" basePath="/Test" doc:name="HTTP Request Configuration"/>
+    <flow name="scatterexcedemoFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/scatterdemo" allowedMethods="GET" doc:name="HTTP"/>
+        <scatter-gather doc:name="Scatter-Gather">
+            <flow-ref name="Flow1" doc:name="Flow1"/>
+            <flow-ref name="Flow2" doc:name="Flow2"/>
+            <flow-ref name="Flow3" doc:name="Flow3"/>
+        </scatter-gather>
+        <object-to-string-transformer doc:name="Object to String"/>
+    </flow>
+    <flow name="Flow1">
+        <set-payload value="This is flow 1!" doc:name="Set Payload"/>
+    </flow>
+    <flow name="Flow2">
+        <set-payload value="This is flow 2!" doc:name="Set Payload"/>
+        <http:request config-ref="HTTP_Request_Configuration" path="TEST" method="GET" doc:name="HTTP"/>
+        <choice-exception-strategy doc:name="Choice Exception Strategy">
+            <catch-exception-strategy doc:name="Catch Exception Strategy">
+                <set-payload value="This is exception in flow 2 !" doc:name="Set Payload"/>
+            </catch-exception-strategy>
+        </choice-exception-strategy>
+    </flow>
+    <flow name="Flow3">
+        <set-payload value="This is flow 3!" doc:name="Set Payload"/>
+    </flow>
+</mule>
